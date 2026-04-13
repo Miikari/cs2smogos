@@ -1,23 +1,44 @@
 // src/App.jsx
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { isAuthenticated, clearStoredPassword } from './lib/auth.js'
 import LoginScreen from './components/LoginScreen.jsx'
 import TacticsList from './components/TacticsList.jsx'
 import GrenadeView from './components/GrenadeView.jsx'
+import { fetchTactics } from './lib/firebase.js'
 
 const MAPS = ['Ancient', 'Anubis', 'Dust 2', 'Inferno', 'Mirage', 'Nuke', 'Overpass']
 const SIDES = [
   { key: 'T', label: 'T-puoli' },
   { key: 'CT', label: 'CT-puoli' },
 ]
+const ZONES = ['A-Site', 'B-Site', 'Muut']
 
 export default function App() {
   const [authed, setAuthed] = useState(isAuthenticated())
   const [map, setMap] = useState('Mirage')
   const [side, setSide] = useState(null)
-  const [view, setView] = useState('main') // 'main' | 'grenades'
+  const [view, setView] = useState('main')
   const [currentTactic, setCurrentTactic] = useState(null)
   const [currentZone, setCurrentZone] = useState(null)
+  const [sideCounts, setSideCounts] = useState({})
+
+  const refreshCounts = useCallback(async () => {
+    const counts = {}
+    await Promise.all(
+      SIDES.flatMap(s =>
+        ZONES.map(async z => {
+          const data = await fetchTactics(map, s.key, z)
+          counts[s.key] = (counts[s.key] || 0) + data.length
+        })
+      )
+    )
+    setSideCounts(counts)
+  }, [map])
+
+  // Fetch once on mount and when map changes
+  useEffect(() => {
+    refreshCounts()
+  }, [refreshCounts])
 
   if (!authed) {
     return <LoginScreen onSuccess={() => setAuthed(true)} />
@@ -87,6 +108,19 @@ export default function App() {
                   onClick={() => setSide(s.key)}
                 >
                   {s.label}
+                  {sideCounts[s.key] > 0 && (
+                    <span style={{
+                      marginLeft: '8px',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      background: side === s.key ? 'rgba(255,255,255,0.15)' : 'var(--surface3)',
+                      color: side === s.key ? '#fff' : 'var(--text3)',
+                      borderRadius: '10px',
+                      padding: '1px 8px',
+                    }}>
+                      {sideCounts[s.key]}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -97,6 +131,7 @@ export default function App() {
                   map={map}
                   side={side}
                   onOpenTactic={(tactic, zone) => handleOpenTactic(tactic, zone)}
+                  onTacticAdded={refreshCounts}
                 />
               </div>
             )}

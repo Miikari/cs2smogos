@@ -5,7 +5,7 @@ import Modal, { ModalActions, BtnCancel, BtnConfirm } from './Modal.jsx'
 
 const ZONES = ['A-Site', 'B-Site', 'Muut']
 
-export default function TacticsList({ map, side, onOpenTactic }) {
+export default function TacticsList({ map, side, onOpenTactic, onTacticAdded }) {
   const [zone, setZone] = useState(null)
   const [tactics, setTactics] = useState([])
   const [zoneCounts, setZoneCounts] = useState({})
@@ -43,6 +43,7 @@ export default function TacticsList({ map, side, onOpenTactic }) {
     setSaving(false)
     setTacticName('')
     setModalOpen(false)
+    onTacticAdded?.()
   }
 
   async function handleRename() {

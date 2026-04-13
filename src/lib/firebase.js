@@ -61,6 +61,10 @@ export async function renameTactic(map, side, zone, tacticId, name) {
   await setDoc(doc(tacticsCol(map, side, zone), tacticId), { name }, { merge: true })
 }
 
+export async function updateTacticDescription(map, side, zone, tacticId, description) {
+  await setDoc(doc(tacticsCol(map, side, zone), tacticId), { description }, { merge: true })
+}
+
 export async function deleteTactic(map, side, zone, tacticId) {
   await deleteDoc(doc(tacticsCol(map, side, zone), tacticId))
   // Poistetaan myös kranaatit
