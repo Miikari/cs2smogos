@@ -1,16 +1,19 @@
 // src/components/LoginScreen.jsx
 import { useState } from 'react'
-import { checkPassword, setStoredPassword } from '../lib/auth.js'
+import { login } from '../lib/auth.js'
 
 export default function LoginScreen({ onSuccess }) {
   const [pw, setPw] = useState('')
   const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [shake, setShake] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    if (checkPassword(pw)) {
-      setStoredPassword(pw)
+    setLoading(true)
+    const ok = await login(pw)
+    setLoading(false)
+    if (ok) {
       onSuccess()
     } else {
       setError(true)
@@ -33,10 +36,11 @@ export default function LoginScreen({ onSuccess }) {
             placeholder="Syötä salasana..."
             style={{ ...styles.input, ...(error ? styles.inputError : {}) }}
             autoFocus
+            disabled={loading}
           />
           {error && <div style={styles.errorMsg}>Väärä salasana</div>}
-          <button type="submit" style={styles.btn} disabled={!pw}>
-            Kirjaudu sisään
+          <button type="submit" style={{ ...styles.btn, opacity: (!pw || loading) ? 0.5 : 1 }} disabled={!pw || loading}>
+            {loading ? 'Tarkistetaan...' : 'Kirjaudu sisään'}
           </button>
         </form>
       </div>
@@ -55,72 +59,14 @@ export default function LoginScreen({ onSuccess }) {
 }
 
 const styles = {
-  wrap: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'var(--bg)',
-    padding: '20px',
-  },
-  card: {
-    background: 'var(--surface)',
-    border: '1px solid var(--border2)',
-    borderRadius: 'var(--radius-xl)',
-    padding: '40px 32px',
-    width: '100%',
-    maxWidth: '360px',
-    textAlign: 'center',
-    animation: 'fadeIn 0.3s ease',
-  },
-  logo: {
-    fontSize: '36px',
-    fontWeight: '800',
-    color: 'var(--accent)',
-    letterSpacing: '0.08em',
-    marginBottom: '4px',
-  },
-  subtitle: {
-    fontSize: '15px',
-    color: 'var(--text2)',
-    marginBottom: '32px',
-    letterSpacing: '0.1em',
-    textTransform: 'uppercase',
-  },
+  wrap: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', padding: '20px' },
+  card: { background: 'var(--surface)', border: '1px solid var(--border2)', borderRadius: 'var(--radius-xl)', padding: '40px 32px', width: '100%', maxWidth: '360px', textAlign: 'center', animation: 'fadeIn 0.3s ease' },
+  logo: { fontSize: '36px', fontWeight: '800', color: 'var(--accent)', letterSpacing: '0.08em', marginBottom: '4px' },
+  subtitle: { fontSize: '15px', color: 'var(--text2)', marginBottom: '32px', letterSpacing: '0.1em', textTransform: 'uppercase' },
   form: { display: 'flex', flexDirection: 'column', gap: '10px' },
-  label: {
-    fontSize: '11px',
-    color: 'var(--text3)',
-    textAlign: 'left',
-    textTransform: 'uppercase',
-    letterSpacing: '0.1em',
-  },
-  input: {
-    padding: '12px 14px',
-    background: 'var(--surface2)',
-    border: '1px solid var(--border)',
-    borderRadius: 'var(--radius)',
-    color: 'var(--text)',
-    fontSize: '15px',
-    outline: 'none',
-    transition: 'border-color 0.15s',
-  },
+  label: { fontSize: '11px', color: 'var(--text3)', textAlign: 'left', textTransform: 'uppercase', letterSpacing: '0.1em' },
+  input: { padding: '12px 14px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text)', fontSize: '15px', outline: 'none', transition: 'border-color 0.15s' },
   inputError: { borderColor: 'var(--t-color)' },
-  errorMsg: {
-    fontSize: '12px',
-    color: 'var(--t-color)',
-    textAlign: 'left',
-  },
-  btn: {
-    marginTop: '8px',
-    padding: '13px',
-    background: 'var(--accent)',
-    border: 'none',
-    borderRadius: 'var(--radius)',
-    color: '#0d0d0d',
-    fontSize: '15px',
-    fontWeight: '700',
-    transition: 'opacity 0.15s',
-    cursor: 'pointer',
-  },
+  errorMsg: { fontSize: '12px', color: 'var(--t-color)', textAlign: 'left' },
+  btn: { marginTop: '8px', padding: '13px', background: 'var(--accent)', border: 'none', borderRadius: 'var(--radius)', color: '#0d0d0d', fontSize: '15px', fontWeight: '700', cursor: 'pointer', transition: 'opacity 0.15s' },
 }

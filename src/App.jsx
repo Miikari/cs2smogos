@@ -14,13 +14,22 @@ const SIDES = [
 const ZONES = ['A-Site', 'B-Site', 'Muut']
 
 export default function App() {
-  const [authed, setAuthed] = useState(isAuthenticated())
+  const [authed, setAuthed] = useState(false)
+  const [authChecked, setAuthChecked] = useState(false)
   const [map, setMap] = useState('Mirage')
   const [side, setSide] = useState(null)
   const [view, setView] = useState('main')
   const [currentTactic, setCurrentTactic] = useState(null)
   const [currentZone, setCurrentZone] = useState(null)
   const [sideCounts, setSideCounts] = useState({})
+
+  // Tarkista auth Firestoresta mountissa
+  useEffect(() => {
+    isAuthenticated().then(ok => {
+      setAuthed(ok)
+      setAuthChecked(true)
+    })
+  }, [])
 
   const refreshCounts = useCallback(async () => {
     const counts = {}
@@ -35,10 +44,18 @@ export default function App() {
     setSideCounts(counts)
   }, [map])
 
-  // Fetch once on mount and when map changes
   useEffect(() => {
-    refreshCounts()
-  }, [refreshCounts])
+    if (authed) refreshCounts()
+  }, [refreshCounts, authed])
+
+  // Latausruutu ennen auth-tarkistusta
+  if (!authChecked) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '28px', height: '28px', border: '2px solid #333', borderTopColor: '#e8c44a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      </div>
+    )
+  }
 
   if (!authed) {
     return <LoginScreen onSuccess={() => setAuthed(true)} />
@@ -63,11 +80,8 @@ export default function App() {
     setCurrentTactic(null)
   }
 
-  const sideColor = side === 'T' ? 'var(--t-color)' : side === 'CT' ? 'var(--ct-color)' : 'var(--text2)'
-
   return (
     <div style={styles.app}>
-      {/* Header */}
       <header style={styles.header}>
         <div style={styles.logo}>CS2 <span style={styles.logoSub}>Taktiikat</span></div>
         <button style={styles.logoutBtn} onClick={() => { clearStoredPassword(); setAuthed(false) }} title="Kirjaudu ulos">
@@ -75,7 +89,6 @@ export default function App() {
         </button>
       </header>
 
-      {/* Map tabs */}
       <nav style={styles.mapTabs}>
         {MAPS.map(m => (
           <button
@@ -88,9 +101,7 @@ export default function App() {
         ))}
       </nav>
 
-      {/* Main content */}
       <main style={styles.main}>
-        {/* Side selector */}
         {view === 'main' && (
           <>
             <div style={styles.sideGrid}>
@@ -110,13 +121,10 @@ export default function App() {
                   {s.label}
                   {sideCounts[s.key] > 0 && (
                     <span style={{
-                      marginLeft: '8px',
-                      fontSize: '12px',
-                      fontWeight: '600',
+                      marginLeft: '8px', fontSize: '12px', fontWeight: '600',
                       background: side === s.key ? 'rgba(255,255,255,0.15)' : 'var(--surface3)',
                       color: side === s.key ? '#fff' : 'var(--text3)',
-                      borderRadius: '10px',
-                      padding: '1px 8px',
+                      borderRadius: '10px', padding: '1px 8px',
                     }}>
                       {sideCounts[s.key]}
                     </span>
@@ -183,7 +191,8 @@ const styles = {
   main: { flex: 1, padding: '16px', maxWidth: '700px', margin: '0 auto', width: '100%' },
   sideGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' },
   sideBtn: {
-    padding: '14px', borderRadius: 'var(--radius-lg)', border: '1.5px solid var(--border)',
+    padding: '14px', borderRadius: 'var(--radius-lg)',
+    borderWidth: '1.5px', borderStyle: 'solid', borderColor: 'var(--border)',
     background: 'var(--surface)', color: 'var(--text2)', fontSize: '15px', fontWeight: '600',
     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
     transition: 'all 0.15s', letterSpacing: '0.03em',

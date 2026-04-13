@@ -1,33 +1,60 @@
 // src/lib/auth.js
-// Yksinkertainen salasanasuojaus - ei käyttäjätilejä
-// Salasana tallennetaan sessionStorage:iin (häviää kun selain suljetaan)
+// Salasana tarkistetaan Firestoresta - ei näy selaimessa
 
-const SESSION_KEY = 'cs2_auth'
+import { db } from './firebase.js'
+import { doc, getDoc } from 'firebase/firestore'
 
-export function getStoredPassword() {
-  return sessionStorage.getItem(SESSION_KEY)
+const SESSION_KEY = 'cs2_auth_token'
+
+export function setStoredToken(token) {
+  sessionStorage.setItem(SESSION_KEY, token)
 }
 
-export function setStoredPassword(pw) {
-  sessionStorage.setItem(SESSION_KEY, pw)
+export function getStoredToken() {
+  return sessionStorage.getItem(SESSION_KEY)
 }
 
 export function clearStoredPassword() {
   sessionStorage.removeItem(SESSION_KEY)
 }
 
-// Salasana on määritelty .env tiedostossa
-export function checkPassword(input) {
-  const correct = import.meta.env.VITE_APP_PASSWORD
-  if (!correct) {
-    console.warn('VITE_APP_PASSWORD ei ole määritelty .env tiedostossa!')
+// Tarkistaa salasanan Firestoresta - salasana ei ole koodissa
+export async function checkPassword(input) {
+  try {
+    const ref = doc(db, 'config', 'auth')
+    const snap = await getDoc(ref)
+    if (!snap.exists()) return false
+    return snap.data().password === input
+  } catch (e) {
     return false
   }
-  return input === correct
 }
 
-export function isAuthenticated() {
-  const stored = getStoredPassword()
-  if (!stored) return false
-  return checkPassword(stored)
+// Sessiotoken on hash syötetystä salasanasta
+async function hashPassword(pw) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw))
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+export async function login(input) {
+  const ok = await checkPassword(input)
+  if (!ok) return false
+  const token = await hashPassword(input)
+  setStoredToken(token)
+  return true
+}
+
+export async function isAuthenticated() {
+  const token = getStoredToken()
+  if (!token) return false
+  // Verrataan tallennettu token Firestore-salasanan hashiin
+  try {
+    const ref = doc(db, 'config', 'auth')
+    const snap = await getDoc(ref)
+    if (!snap.exists()) return false
+    const correctHash = await hashPassword(snap.data().password)
+    return token === correctHash
+  } catch (e) {
+    return false
+  }
 }
