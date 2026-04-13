@@ -341,6 +341,7 @@ export default function GrenadeView({ map, side, zone, tactic, onBack }) {
   }
   const [desc, setDesc] = useState(tactic.description || '')
   const [descSaving, setDescSaving] = useState(false)
+  const [descEdit, setDescEdit] = useState(false)
   const descRef = useRef()
 
   async function handleSaveDesc() {
