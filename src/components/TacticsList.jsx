@@ -1,9 +1,9 @@
 // src/components/TacticsList.jsx
 import { useState, useEffect } from 'react'
-import { subscribeTactics, addTactic, deleteTactic } from '../lib/firebase.js'
+import { subscribeTactics, addTactic, deleteTactic, renameTactic } from '../lib/firebase.js'
 import Modal, { ModalActions, BtnCancel, BtnConfirm } from './Modal.jsx'
 
-const ZONES = ['A-Site', 'B-Site', 'Muut']
+const ZONES = ['B', 'A', 'Muut']
 
 export default function TacticsList({ map, side, onOpenTactic }) {
   const [zone, setZone] = useState(null)
@@ -12,6 +12,7 @@ export default function TacticsList({ map, side, onOpenTactic }) {
   const [loading, setLoading] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [tacticName, setTacticName] = useState('')
+  const [editTarget, setEditTarget] = useState(null)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -42,6 +43,16 @@ export default function TacticsList({ map, side, onOpenTactic }) {
     setSaving(false)
     setTacticName('')
     setModalOpen(false)
+  }
+
+  async function handleRename() {
+    const name = tacticName.trim()
+    if (!name || !editTarget) return
+    setSaving(true)
+    await renameTactic(map, side, zone, editTarget.id, name)
+    setSaving(false)
+    setTacticName('')
+    setEditTarget(null)
   }
 
   async function handleDelete(tacticId, tacticName) {
@@ -106,6 +117,12 @@ export default function TacticsList({ map, side, onOpenTactic }) {
                 </div>
                 <div style={styles.cardArrow}>›</div>
                 <button
+                  style={styles.editBtn}
+                  onClick={e => { e.stopPropagation(); setEditTarget(t); setTacticName(t.name) }}
+                >
+                  Muokkaa
+                </button>
+                <button
                   style={styles.delBtn}
                   onClick={e => { e.stopPropagation(); handleDelete(t.id, t.name) }}
                 >
@@ -142,6 +159,26 @@ export default function TacticsList({ map, side, onOpenTactic }) {
           </BtnConfirm>
         </ModalActions>
       </Modal>
+
+      <Modal open={!!editTarget} onClose={() => { setEditTarget(null); setTacticName('') }} title="Muokkaa taktiikkaa">
+        <div style={styles.formGroup}>
+          <label style={styles.formLabel}>Taktiikan nimi</label>
+          <input
+            style={styles.input}
+            value={tacticName}
+            onChange={e => setTacticName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleRename()}
+            maxLength={60}
+            autoFocus
+          />
+        </div>
+        <ModalActions>
+          <BtnCancel onClick={() => { setEditTarget(null); setTacticName('') }} />
+          <BtnConfirm onClick={handleRename} disabled={!tacticName.trim() || saving}>
+            {saving ? 'Tallennetaan...' : 'Tallenna'}
+          </BtnConfirm>
+        </ModalActions>
+      </Modal>
     </div>
   )
 }
@@ -174,6 +211,12 @@ const styles = {
   cardInfo: { flex: 1 },
   cardName: { fontSize: '14px', fontWeight: '500', color: 'var(--text)' },
   cardArrow: { color: 'var(--text3)', fontSize: '18px' },
+  editBtn: {
+    padding: '6px 10px', borderRadius: 'var(--radius)',
+    border: '1px solid var(--border2)', background: 'transparent',
+    color: 'var(--text2)', fontSize: '12px', flexShrink: 0,
+    transition: 'all 0.15s', cursor: 'pointer',
+  },
   delBtn: {
     padding: '6px 10px', borderRadius: 'var(--radius)',
     border: '1px solid rgba(224,85,85,0.3)', background: 'transparent',
