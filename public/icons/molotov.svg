@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <!-- Bottle body -->
+  <path d="M19 28 Q16 28 16 34 Q16 42 24 42 Q32 42 32 34 Q32 28 29 28 Z" fill="#c87820"/>
+  <!-- Bottle neck -->
+  <rect x="20" y="18" width="8" height="11" rx="2" fill="#a06010"/>
+  <!-- Liquid inside -->
+  <path d="M19 34 Q16 34 16 38 Q16 42 24 42 Q32 42 32 38 Q32 34 29 34 Z" fill="#e05010" opacity="0.6"/>
+  <!-- Rag/cloth in neck -->
+  <rect x="21" y="13" width="6" height="6" rx="1" fill="#d4a040"/>
+  <!-- Flame -->
+  <path d="M24 13 Q22 9 24 6 Q23 4 22 5 Q20 2 22 1 Q19 3 20 6 Q18 4 19 7 Q17 6 18 9 Q17 11 19 12 Q21 14 24 13Z" fill="#ff8020"/>
+  <path d="M24 13 Q25 9 24 7 Q26 5 25 4 Q27 6 26 9 Q28 8 27 11 Q28 12 26 13 Q25 14 24 13Z" fill="#ffb030"/>
+  <path d="M24 12 Q23 10 24 8 Q25 10 24 12Z" fill="#fff060" opacity="0.8"/>
+</svg>

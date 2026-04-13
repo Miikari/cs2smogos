@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <!-- Body -->
+  <rect x="16" y="20" width="16" height="20" rx="4" fill="#7a7a9a"/>
+  <!-- Top cap -->
+  <rect x="19" y="14" width="10" height="7" rx="2" fill="#5a5a7a"/>
+  <!-- Pin -->
+  <line x1="24" y1="14" x2="24" y2="10" stroke="#aaaacc" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="24" cy="9" r="2" fill="#aaaacc"/>
+  <!-- Smoke clouds -->
+  <circle cx="18" cy="7" r="4" fill="#b0b0c8" opacity="0.7"/>
+  <circle cx="24" cy="5" r="5" fill="#c0c0d8" opacity="0.8"/>
+  <circle cx="30" cy="7" r="4" fill="#b0b0c8" opacity="0.7"/>
+  <circle cx="21" cy="3" r="3" fill="#d0d0e8" opacity="0.6"/>
+  <circle cx="27" cy="3" r="3" fill="#d0d0e8" stroke="none" opacity="0.6"/>
+  <!-- Lever -->
+  <rect x="30" y="21" width="5" height="3" rx="1" fill="#9a9aba"/>
+</svg>
