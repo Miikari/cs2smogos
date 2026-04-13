@@ -1,0 +1,24 @@
+{
+  "name": "CS2 Taktiikat",
+  "short_name": "CS2 Taktiikat",
+  "description": "CS2 savut ja kranaatit kaikille kartoille",
+  "start_url": "/cs2smogos/",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#0d0d0d",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/cs2smogos/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/cs2smogos/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
