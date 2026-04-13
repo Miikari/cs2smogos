@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { subscribeTactics, addTactic, deleteTactic } from '../lib/firebase.js'
 import Modal, { ModalActions, BtnCancel, BtnConfirm } from './Modal.jsx'
 
-const ZONES = ['B', 'A', 'Muut']
+const ZONES = ['A-Site', 'B-Site', 'Muut']
 
 export default function TacticsList({ map, side, onOpenTactic }) {
   const [zone, setZone] = useState(null)
